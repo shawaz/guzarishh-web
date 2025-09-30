@@ -1,7 +1,18 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import type { Session, User } from '@/lib/auth'
+
+interface User {
+  id: string
+  email: string
+  name?: string
+  role?: string
+}
+
+interface Session {
+  user: User
+  expires: string
+}
 
 interface AuthContextType {
   user: User | null
