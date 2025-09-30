@@ -5,9 +5,7 @@
   "installCommand": "npm install",
   "devCommand": "npm run dev",
   "env": {
-    "NOTION_API_KEY": "@notion_api_key",
-    "NOTION_PRODUCTS_DATABASE_ID": "@notion_products_database_id",
-    "NOTION_ORDERS_DATABASE_ID": "@notion_orders_database_id",
+    "NEXT_PUBLIC_CONVEX_URL": "@convex_url",
     "NEXT_PUBLIC_TELR_STORE_ID": "@telr_store_id",
     "NEXT_PUBLIC_TELR_AUTH_KEY": "@telr_auth_key"
   },

@@ -74,7 +74,7 @@ export default function HomePage() {
       <Header />
       
       <main className="flex-1">
-        {/* Dynamic Hero Banner from Notion */}
+        {/* Dynamic Hero Banner */}
         <section className="py-8">
           <div className="container max-w-7xl mx-auto px-4">
             <DynamicBanner />
@@ -192,7 +192,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Dynamic Testimonials from Notion */}
+        {/* Dynamic Testimonials */}
         {/* <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <DynamicTestimonials />

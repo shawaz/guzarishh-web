@@ -141,7 +141,7 @@ export default function DynamicBanner() {
       {/* Auto-rotate */}
       {banners.length > 1 && (
         <div className="absolute bottom-2 right-4 text-white text-xs opacity-75">
-          Dynamic content from Notion
+          Dynamic content
         </div>
       )}
     </div>
