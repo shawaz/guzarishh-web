@@ -62,7 +62,11 @@ A modern, full-stack e-commerce platform built with Next.js, Convex, and Tailwin
    Create a `.env.local` file in the root directory:
    ```env
    NEXT_PUBLIC_CONVEX_URL=your_convex_deployment_url
+   NEXT_PUBLIC_TELR_STORE_ID=your_telr_store_id (optional)
+   NEXT_PUBLIC_TELR_AUTH_KEY=your_telr_auth_key (optional)
    ```
+   
+   You can copy from `env.example` and fill in your actual values.
 
 5. **Run the development server**
    ```bash
