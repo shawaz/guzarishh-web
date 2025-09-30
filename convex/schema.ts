@@ -1,0 +1,118 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  // Products table
+  products: defineTable({
+    name: v.string(),
+    price: v.number(),
+    originalPrice: v.optional(v.number()),
+    image: v.string(),
+    images: v.optional(v.array(v.string())),
+    rating: v.optional(v.number()),
+    reviews: v.optional(v.number()),
+    category: v.union(v.literal("Casual"), v.literal("Festive"), v.literal("Office")),
+    description: v.optional(v.string()),
+    size: v.optional(v.string()),
+    colors: v.optional(v.array(v.string())),
+    inStock: v.optional(v.boolean()),
+    stockQuantity: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+    featured: v.optional(v.boolean()),
+  })
+    .index("by_category", ["category"])
+    .index("by_featured", ["featured"])
+    .index("by_inStock", ["inStock"]),
+
+  // Orders table
+  orders: defineTable({
+    userId: v.string(),
+    items: v.string(), // JSON string of cart items
+    total: v.number(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("shipped"),
+      v.literal("delivered"),
+      v.literal("cancelled")
+    ),
+    shippingAddress: v.optional(v.string()),
+    paymentMethod: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"]),
+
+  // Invoices table
+  invoices: defineTable({
+    orderId: v.string(),
+    userId: v.string(),
+    invoiceNumber: v.string(),
+    amount: v.number(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("paid"),
+      v.literal("overdue"),
+      v.literal("cancelled")
+    ),
+    dueDate: v.optional(v.number()),
+    paidDate: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_orderId", ["orderId"])
+    .index("by_status", ["status"]),
+
+  // Suppliers table
+  suppliers: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+    contactPerson: v.optional(v.string()),
+    status: v.union(
+      v.literal("active"),
+      v.literal("inactive"),
+      v.literal("suspended")
+    ),
+    notes: v.optional(v.string()),
+  })
+    .index("by_status", ["status"]),
+
+  // Customers table
+  customers: defineTable({
+    userId: v.string(),
+    email: v.string(),
+    name: v.string(),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+    status: v.union(
+      v.literal("active"),
+      v.literal("inactive"),
+      v.literal("blocked")
+    ),
+    totalOrders: v.optional(v.number()),
+    totalSpent: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"]),
+
+  // User profiles table
+  userProfiles: defineTable({
+    userId: v.string(),
+    email: v.string(),
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    role: v.union(
+      v.literal("user"),
+      v.literal("admin"),
+      v.literal("superadmin")
+    ),
+    avatar: v.optional(v.string()),
+    address: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_email", ["email"])
+    .index("by_role", ["role"]),
+});

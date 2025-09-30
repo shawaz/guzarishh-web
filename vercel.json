@@ -1,0 +1,40 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "env": {
+    "NOTION_API_KEY": "@notion_api_key",
+    "NOTION_PRODUCTS_DATABASE_ID": "@notion_products_database_id",
+    "NOTION_ORDERS_DATABASE_ID": "@notion_orders_database_id",
+    "NEXT_PUBLIC_TELR_STORE_ID": "@telr_store_id",
+    "NEXT_PUBLIC_TELR_AUTH_KEY": "@telr_auth_key"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    }
+  ]
+}
