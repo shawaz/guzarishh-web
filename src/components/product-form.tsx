@@ -172,6 +172,18 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Image Upload */}
+            <div>
+            <label className="block text-sm font-medium mb-2">Product Images *</label>
+            <ImageUpload
+              onImageUpload={handleImageUpload}
+              onImageRemove={handleImageRemove}
+              images={uploadedImages}
+              maxImages={6}
+              aspectRatio="aspect-[3/4]"
+            />
+          </div>
+
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -256,21 +268,6 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
               placeholder="Enter product description"
               className="w-full p-2 border border-gray-300 rounded-md h-24 resize-none"
             />
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Product Images *</label>
-            <ImageUpload
-              onImageUpload={handleImageUpload}
-              onImageRemove={handleImageRemove}
-              images={uploadedImages}
-              maxImages={6}
-              aspectRatio="aspect-[3/4]"
-            />
-            <p className="text-sm text-gray-500 mt-2">
-              Upload images to preview them. Images will be saved when you submit the form.
-            </p>
           </div>
 
           {/* Size */}

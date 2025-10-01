@@ -8,8 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Package, Plus, Search, Edit, Trash2, ArrowLeft, Eye, Filter } from 'lucide-react'
-import Link from 'next/link'
+import { Package, Plus, Search, Edit, Trash2, Filter } from 'lucide-react'
 import ProductForm from '@/components/product-form'
 import { Product } from '@/contexts/ConvexProductContext'
 import { Id } from '@/convex/_generated/dataModel'
@@ -114,6 +113,10 @@ export default function AdminProducts() {
                 <option value="Festive">Festive</option>
                 <option value="Office">Office</option>
               </select>
+              <Button onClick={handleAddNew}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
             </div>
           </div>
         </div>
