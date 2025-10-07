@@ -133,10 +133,12 @@ export default function ProductDetailPage() {
     removeItemByProductId(product._id)
   }
 
-  const allImages = [product.image, ...(product.images || [])].filter(Boolean)
+  // Combine main image with additional images, removing duplicates
+  const additionalImages = (product.images || []).filter(img => img !== product.image)
+  const allImages = [product.image, ...additionalImages].filter(Boolean)
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-orange-50 dark:bg-orange-900/10 flex flex-col">
       <Header />
       
       <main className="flex-1">
@@ -214,29 +216,15 @@ export default function ProductDetailPage() {
                   <span className="text-sm text-gray-500">SKU: {product._id.slice(-8)}</span>
                 </div>
                 
-                <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+                <h1 className="text-xl font-bold mb-2">{product.name}</h1>
                 
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`h-5 w-5 ${
-                          i < (product.rating || 0) 
-                            ? 'text-yellow-400 fill-current' 
-                            : 'text-gray-300'
-                        }`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">({product.reviews || 0} reviews)</span>
-                </div>
+              
 
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-3xl font-bold">AED {product.price}</span>
                   {product.originalPrice && product.originalPrice > product.price && (
                     <>
-                      <span className="text-xl text-gray-500 line-through">
+                      <span className="text-md text-gray-500 line-through">
                         AED {product.originalPrice}
                       </span>
                       <Badge variant="destructive" className="ml-2">
@@ -247,7 +235,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 {product.description && (
-                  <p className="text-gray-700 mb-6">{product.description}</p>
+                  <p className="text-gray-700 dark:text-gray-300 mb-6">{product.description}</p>
                 )}
               </div>
 
@@ -256,9 +244,6 @@ export default function ProductDetailPage() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold">Size</h3>
-                    <button className="text-sm text-primary hover:underline">
-                      Size chart
-                    </button>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {product.sizes.map((size) => {
@@ -273,10 +258,10 @@ export default function ProductDetailPage() {
                           disabled={!isAvailable}
                           className={`px-3 py-2 text-sm font-medium rounded border transition-all ${
                             isSelected
-                              ? 'border-primary bg-primary text-white'
+                              ? 'border-primary bg-primary text-white dark:text-black'
                               : isAvailable
                                 ? 'border-gray-300 hover:border-primary hover:bg-primary/5'
-                                : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'border-gray-200 bg-gray-100 text-gray-400 dark:text-gray-400 cursor-not-allowed'
                           }`}
                         >
                           {size}
@@ -287,27 +272,6 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Color Selection */}
-              {product.colors && product.colors.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Color</h3>
-                  <div className="flex gap-2">
-                    {product.colors.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-10 h-10 rounded-full border-2 transition-all ${
-                          selectedColor === color
-                            ? 'border-primary ring-2 ring-primary/20'
-                            : 'border-gray-300 hover:border-primary'
-                        }`}
-                        style={{ backgroundColor: getColorValue(color) }}
-                        title={color}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Quantity Selection */}
               <div>
@@ -418,7 +382,7 @@ export default function ProductDetailPage() {
                       )}
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2 line-clamp-2">{relatedProduct.name}</h3>
+                      <h4 className="font-semibold mb-2 text-md line-clamp-2">{relatedProduct.name}</h4>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg font-bold">AED {relatedProduct.price}</span>
                         {relatedProduct.originalPrice && relatedProduct.originalPrice > relatedProduct.price && (
@@ -426,21 +390,6 @@ export default function ProductDetailPage() {
                             AED {relatedProduct.originalPrice}
                           </span>
                         )}
-                      </div>
-                      <div className="flex items-center gap-1 mb-2">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-4 w-4 ${
-                                i < (relatedProduct.rating || 0) 
-                                  ? 'text-yellow-400 fill-current' 
-                                  : 'text-gray-300'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-gray-600">({relatedProduct.reviews || 0})</span>
                       </div>
                       {relatedProduct.sizes && relatedProduct.sizes.length > 0 && (
                         <div className="flex flex-wrap gap-1">

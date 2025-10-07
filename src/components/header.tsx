@@ -88,42 +88,9 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          {/* <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/#casual" className="text-sm font-medium hover:text-primary transition-colors">
-              Casual Wear
-            </Link>
-            <Link href="/#festive" className="text-sm font-medium hover:text-primary transition-colors">
-              Festive Wear
-            </Link>
-            <Link href="/#office" className="text-sm font-medium hover:text-primary transition-colors">
-              Office Wear
-            </Link>
-          </nav> */}
-
-          {/* Search Bar */}
-          {/* <div className="hidden lg:flex items-center space-x-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search products..."
-                className="pl-10 w-64"
-              />
-            </div>
-          </div> */}
-
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
-            {/* Search Icon */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setSearchOpen(!searchOpen)} 
-              title="Search Products"
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-
+            
             {/* Theme Toggle */}
             <Button 
               variant="ghost" 
@@ -149,9 +116,9 @@ export default function Header() {
                     </Button>
                   </Link>
                 )}
-                <Button variant="ghost" size="icon" onClick={signOut} title="Sign Out">
+                {/* <Button variant="ghost" size="icon" onClick={signOut} title="Sign Out">
                   <LogOut className="h-5 w-5" />
-                </Button>
+                </Button> */}
               </div>
             ) : (
               <Button variant="ghost" size="icon" onClick={() => setAuthModalOpen(true)} title="Sign In">
@@ -171,81 +138,9 @@ export default function Header() {
                 </span>
               )}
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t">
-            <nav className="flex flex-col space-y-2 py-4">
-              <Link href="/" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
-                Home
-              </Link>
-              <Link href="/#casual" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
-                Casual Wear
-              </Link>
-              <Link href="/#festive" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
-                Festive Wear
-              </Link>
-              <Link href="/#office" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
-                Office Wear
-              </Link>
-              <Link href="/contact" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
-                Contact
-              </Link>
-              <div className="px-4 py-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search products..."
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </nav>
-          </div>
-        )}
-
-        {/* Search Dropdown */}
-        {searchOpen && (
-          <div ref={searchRef} className="absolute top-full left-0 right-0 bg-background border-b shadow-lg z-40">
-            <div className="container max-w-7xl mx-auto px-4 py-4">
-              <form onSubmit={handleSearch} className="flex items-center space-x-2">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search products..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                    autoFocus
-                  />
-                </div>
-                <Button type="submit" disabled={!searchTerm.trim()}>
-                  Search
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => {
-                    setSearchOpen(false)
-                    setSearchTerm('')
-                  }}
-                >
-                  Cancel
-                </Button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
       
       {/* Auth Modal */}

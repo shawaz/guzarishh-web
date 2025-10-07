@@ -27,10 +27,20 @@ export default function DynamicBanner() {
   const fetchBanners = async () => {
     try {
       const response = await fetch('/api/banners')
+      
+      // Check if response is ok and content type is JSON
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        // API endpoint doesn't exist, use fallback
+        setBanners([])
+        return
+      }
+      
       const data = await response.json()
       setBanners(data.banners || [])
     } catch (error) {
       console.error('Error fetching banners:', error)
+      // Set empty banners array on error to show fallback
+      setBanners([])
     } finally {
       setLoading(false)
     }

@@ -52,11 +52,6 @@ export default function HomePage() {
   
   // Get featured products
   const featuredProducts = getFeaturedProducts().slice(0, 4)
-  
-  // Get all products by category
-  const casualProducts = products.filter(p => p.category === 'Casual')
-  const festiveProducts = products.filter(p => p.category === 'Festive')
-  const officeProducts = products.filter(p => p.category === 'Office')
 
   // Helper functions for managing product selections
   const getProductSelection = (productId: string) => {
@@ -313,7 +308,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-orange-50 dark:bg-orange-900/10 flex flex-col">
       <Header />
       
       <main className="flex-1">
@@ -324,46 +319,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Casual Wear Section */}
-        {casualProducts.length > 0 && (
-          <section id="casual" className="py-16 ">
+        {/* All Products Section */}
+        {products.length > 0 && (
+          <section className="py-16">
             <div className="container max-w-7xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">Casual Wear</h2>
-                <p className="text-gray-600 dark:text-gray-400">Comfortable and stylish everyday fashion</p>
-              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {casualProducts.map(renderProductCard)}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Festive Wear Section */}
-        {festiveProducts.length > 0 && (
-          <section id="festive" className="py-16">
-            <div className="container max-w-7xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">Festive Wear</h2>
-                <p className="text-gray-600">Elegant and traditional outfits for special occasions</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {festiveProducts.map(renderProductCard)}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Office Wear Section */}
-        {officeProducts.length > 0 && (
-          <section id="office" className="py-16 bg-gray-50">
-            <div className="container max-w-7xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">Office Wear</h2>
-                <p className="text-gray-600">Professional and sophisticated work attire</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {officeProducts.map(renderProductCard)}
+                {products.map(renderProductCard)}
               </div>
             </div>
           </section>
