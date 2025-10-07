@@ -90,7 +90,7 @@ export default function ImageUpload({
     } finally {
       setUploading(false)
     }
-  }, [images.length, maxImages, generateUploadUrl, onImageUpload])
+  }, [images.length, maxImages, generateUploadUrl, onImageUpload, convex])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()

@@ -4,7 +4,6 @@ import { createContext, useContext, ReactNode } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
-import { useConvexAuth } from './ConvexAuthContext'
 
 export interface Product {
   _id: Id<"products">
@@ -17,8 +16,13 @@ export interface Product {
   reviews?: number
   category: 'Casual' | 'Festive' | 'Office'
   description?: string
-  size?: string
+  sizes?: string[]
   colors?: string[]
+  stockBySize?: Array<{
+    size: string
+    quantity: number
+    inStock: boolean
+  }>
   inStock?: boolean
   stockQuantity?: number
   tags?: string[]
@@ -39,8 +43,7 @@ interface ProductContextType {
 const ProductContext = createContext<ProductContextType | undefined>(undefined)
 
 export function ConvexProductProvider({ children }: { children: ReactNode }) {
-  const { user } = useConvexAuth()
-  const products = useQuery(api.products.getAll, user ? {} : "skip") || []
+  const products = useQuery(api.products.getAll) || []
   const createProduct = useMutation(api.products.create)
   const updateProductMutation = useMutation(api.products.update)
   const deleteProductMutation = useMutation(api.products.remove)
@@ -57,8 +60,9 @@ export function ConvexProductProvider({ children }: { children: ReactNode }) {
         reviews: product.reviews,
         category: product.category,
         description: product.description,
-        size: product.size,
+        sizes: product.sizes,
         colors: product.colors,
+        stockBySize: product.stockBySize,
         inStock: product.inStock,
         stockQuantity: product.stockQuantity,
         tags: product.tags,
@@ -92,7 +96,6 @@ export function ConvexProductProvider({ children }: { children: ReactNode }) {
   }
 
   const searchProducts = (searchTerm: string) => {
-    if (!user) return []
     if (!searchTerm) return products
     
     return products.filter((product) =>
@@ -103,19 +106,17 @@ export function ConvexProductProvider({ children }: { children: ReactNode }) {
   }
 
   const getProductsByCategory = (category: 'Casual' | 'Festive' | 'Office') => {
-    if (!user) return []
     return products.filter(product => product.category === category)
   }
 
   const getFeaturedProducts = () => {
-    if (!user) return []
     return products.filter(product => product.featured)
   }
 
   return (
     <ProductContext.Provider
       value={{
-        products: user ? products : [],
+        products: products,
         loading: products === undefined,
         addProduct,
         updateProduct,

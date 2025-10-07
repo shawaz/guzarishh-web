@@ -37,6 +37,9 @@ export default function AdminHeader() {
             <Link href="/admin/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
             </Link>
+            <Link href="/admin/inventory" className="text-sm font-medium hover:text-primary transition-colors">
+              Inventory
+            </Link>
             <Link href="/admin/orders" className="text-sm font-medium hover:text-primary transition-colors">
               Orders
             </Link>
@@ -81,6 +84,9 @@ export default function AdminHeader() {
               </Link>
               <Link href="/admin/products" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
                 Products
+              </Link>
+              <Link href="/admin/inventory" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
+                Inventory
               </Link>
               <Link href="/admin/orders" className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors">
                 Orders

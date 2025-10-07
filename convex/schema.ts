@@ -13,10 +13,16 @@ export default defineSchema({
     reviews: v.optional(v.number()),
     category: v.union(v.literal("Casual"), v.literal("Festive"), v.literal("Office")),
     description: v.optional(v.string()),
-    size: v.optional(v.string()),
+    sizes: v.optional(v.array(v.string())),
     colors: v.optional(v.array(v.string())),
+    stockBySize: v.optional(v.array(v.object({
+      size: v.string(),
+      quantity: v.number(),
+      inStock: v.boolean()
+    }))),
+    size: v.optional(v.string()), // Legacy field for backward compatibility
     inStock: v.optional(v.boolean()),
-    stockQuantity: v.optional(v.number()),
+    stockQuantity: v.optional(v.number()), // Keep for backward compatibility
     tags: v.optional(v.array(v.string())),
     featured: v.optional(v.boolean()),
   })

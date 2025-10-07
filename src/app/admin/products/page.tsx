@@ -219,15 +219,35 @@ export default function AdminProducts() {
               <CardContent className="p-4">
                 <h3 className="font-semibold mb-2 truncate">{product.name}</h3>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg font-bold text-primary">₹{product.price}</span>
+                  <span className="text-lg font-bold text-primary">AED {product.price}</span>
                   {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                    <span className="text-sm text-gray-500 line-through">AED {product.originalPrice}</span>
                   )}
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
                   <span>Rating: {product.rating}</span>
                   <span>{product.reviews} reviews</span>
                 </div>
+                {product.sizes && product.sizes.length > 0 && (
+                  <div className="mb-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-xs font-medium text-muted-foreground">Sizes:</span>
+                      <span className="text-xs text-muted-foreground">({product.sizes.length} available)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {product.sizes.slice(0, 4).map((size, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {size}
+                        </Badge>
+                      ))}
+                      {product.sizes.length > 4 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{product.sizes.length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <Badge variant={product.inStock ? "default" : "destructive"}>
                     {product.inStock ? 'In Stock' : 'Out of Stock'}

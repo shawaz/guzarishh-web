@@ -32,8 +32,9 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
     images: product?.images || [],
     category: product?.category || 'Casual' as 'Casual' | 'Festive' | 'Office',
     description: product?.description || '',
-    size: product?.size || '',
+    sizes: product?.sizes || [],
     colors: product?.colors || [],
+    stockBySize: product?.stockBySize || [],
     inStock: product?.inStock ?? true,
     stockQuantity: product?.stockQuantity || 0,
     tags: product?.tags || [],
@@ -41,10 +42,17 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
   })
 
   // State for managing uploaded images with storage IDs
-  const [uploadedImages, setUploadedImages] = useState<Array<{ url: string; storageId: Id<"_storage"> }>>([])
+  const [uploadedImages, setUploadedImages] = useState<Array<{ url: string; storageId: Id<"_storage"> }>>(
+    // Initialize with existing product images when editing
+    product?.images ? product.images.map((url, index) => ({
+      url,
+      storageId: `existing_${index}` as Id<"_storage"> // Temporary ID for existing images
+    })) : []
+  )
 
   const [newColor, setNewColor] = useState('')
   const [newTag, setNewTag] = useState('')
+  const [newSize, setNewSize] = useState('')
 
   // Image upload handlers
   const handleImageUpload = (url: string, storageId: Id<"_storage">) => {
@@ -59,10 +67,11 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
 
   const handleImageRemove = (storageId: Id<"_storage">) => {
     setUploadedImages(prev => {
+      const imageToRemove = prev.find(img => img.storageId === storageId)
       const updated = prev.filter(img => img.storageId !== storageId)
       
       // If we removed the main image, set the first remaining image as main
-      if (formData.image === prev.find(img => img.storageId === storageId)?.url) {
+      if (imageToRemove && formData.image === imageToRemove.url) {
         setFormData(prevForm => ({
           ...prevForm,
           image: updated.length > 0 ? updated[0].url : ''
@@ -99,8 +108,11 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
         images: imageUrls
       }
       
-      // Remove the sizes field if it exists (it's not in the Convex schema)
-      delete (productData as any).sizes
+      // Ensure sizes array is included
+      if (!productData.sizes || productData.sizes.length === 0) {
+        alert('Please add at least one size')
+        return
+      }
       
       // Debug: Log the data being sent to Convex
       console.log('Sending product data to Convex:', productData)
@@ -126,6 +138,23 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
     }
   }
 
+
+  const addSize = () => {
+    if (newSize.trim() && !formData.sizes.includes(newSize.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        sizes: [...prev.sizes, newSize.trim()]
+      }))
+      setNewSize('')
+    }
+  }
+
+  const removeSize = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.filter(s => s !== size)
+    }))
+  }
 
   const addColor = () => {
     if (newColor.trim() && !formData.colors.includes(newColor.trim())) {
@@ -158,6 +187,51 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
     setFormData(prev => ({
       ...prev,
       tags: prev.tags.filter(t => t !== tag)
+    }))
+  }
+
+  // Stock by size management functions
+  const generateStockBySize = () => {
+    if (formData.sizes.length === 0) {
+      alert('Please add at least one size before generating stock entries')
+      return
+    }
+
+    const sizeStocks: Array<{ size: string; quantity: number; inStock: boolean }> = []
+    
+    formData.sizes.forEach(size => {
+      // Check if size stock already exists
+      const existingSizeStock = formData.stockBySize.find(s => s.size === size)
+      if (!existingSizeStock) {
+        sizeStocks.push({
+          size,
+          quantity: 0,
+          inStock: false
+        })
+      }
+    })
+
+    setFormData(prev => ({
+      ...prev,
+      stockBySize: [...prev.stockBySize, ...sizeStocks]
+    }))
+  }
+
+  const updateStockBySize = (size: string, quantity: number) => {
+    setFormData(prev => ({
+      ...prev,
+      stockBySize: prev.stockBySize.map(sizeStock => 
+        sizeStock.size === size
+          ? { ...sizeStock, quantity, inStock: quantity > 0 }
+          : sizeStock
+      )
+    }))
+  }
+
+  const removeStockBySize = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      stockBySize: prev.stockBySize.filter(sizeStock => sizeStock.size !== size)
     }))
   }
 
@@ -213,7 +287,7 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
           {/* Pricing */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Price (₹) *</label>
+              <label className="block text-sm font-medium mb-2">Price (AED) *</label>
               <Input
                 type="number"
                 value={formData.price}
@@ -224,7 +298,7 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Original Price (₹)</label>
+              <label className="block text-sm font-medium mb-2">Original Price (AED)</label>
               <Input
                 type="number"
                 value={formData.originalPrice}
@@ -270,24 +344,39 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
             />
           </div>
 
-          {/* Size */}
+          {/* Sizes */}
           <div>
-            <label className="block text-sm font-medium mb-2">Size *</label>
-            <select
-              value={formData.size}
-              onChange={(e) => setFormData(prev => ({ ...prev, size: e.target.value }))}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            >
-              <option value="">Select a size</option>
-              <option value="XS">XS</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-              <option value="XXL">XXL</option>
-              <option value="One Size">One Size</option>
-            </select>
+            <label className="block text-sm font-medium mb-2">Available Sizes *</label>
+            <div className="flex space-x-2 mb-2">
+              <select
+                value={newSize}
+                onChange={(e) => setNewSize(e.target.value)}
+                className="flex-1 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Select a size to add</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+                <option value="One Size">One Size</option>
+              </select>
+              <Button type="button" onClick={addSize} size="sm">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formData.sizes.map((size, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {size}
+                  <X className="h-3 w-3 cursor-pointer" onClick={() => removeSize(size)} />
+                </Badge>
+              ))}
+            </div>
+            {formData.sizes.length === 0 && (
+              <p className="text-sm text-gray-500 mt-1">Please add at least one size</p>
+            )}
           </div>
 
           {/* Colors */}
@@ -334,6 +423,64 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
                 </Badge>
               ))}
             </div>
+          </div>
+
+          {/* Stock Management */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-medium">Stock by Size</label>
+              <Button 
+                type="button" 
+                onClick={generateStockBySize}
+                size="sm"
+                variant="outline"
+                disabled={formData.sizes.length === 0}
+              >
+                Generate Size Stock
+              </Button>
+            </div>
+            
+            {formData.stockBySize.length > 0 && (
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <div className="grid gap-3">
+                  {formData.stockBySize.map((sizeStock, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div className="flex items-center space-x-4">
+                        <Badge variant="outline">{sizeStock.size}</Badge>
+                        <Badge variant={sizeStock.inStock ? "default" : "secondary"}>
+                          {sizeStock.inStock ? 'In Stock' : 'Out of Stock'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          value={sizeStock.quantity}
+                          onChange={(e) => updateStockBySize(sizeStock.size, Number(e.target.value))}
+                          className="w-20"
+                          min="0"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeStockBySize(sizeStock.size)}
+                          className="h-8 w-8 text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {formData.stockBySize.length === 0 && (
+              <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
+                <p>No size stock configured</p>
+                <p className="text-sm">Add sizes, then click "Generate Size Stock"</p>
+              </div>
+            )}
           </div>
 
           {/* Featured */}

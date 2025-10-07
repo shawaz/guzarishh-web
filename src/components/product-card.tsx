@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Star, Heart, Plus, Minus } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { Product } from '@/contexts/ConvexProductContext'
@@ -15,6 +16,22 @@ interface ProductCardProps {
 export default function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { addItem, items, removeItemByProductId } = useCart()
 
+  // Get the first available size, prioritizing in-stock sizes
+  const getDefaultSize = () => {
+    if (!product.sizes || product.sizes.length === 0) return 'One Size'
+    
+    // If stockBySize is available, prioritize in-stock sizes
+    if (product.stockBySize && product.stockBySize.length > 0) {
+      const inStockSize = product.stockBySize.find(s => s.inStock && s.quantity > 0)
+      if (inStockSize) {
+        return inStockSize.size
+      }
+    }
+    
+    // Fallback to first available size
+    return product.sizes[0] || 'One Size'
+  }
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     addItem({
@@ -22,7 +39,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
       name: product.name,
       price: product.price,
       image: product.image,
-      size: 'M', // Default size
+      size: getDefaultSize(), // Use smart default size selection
       color: 'Default' // Default color
     })
   }
@@ -67,6 +84,26 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
           <span className="text-lg font-bold text-primary">AED {product.price}</span>
           <span className="text-sm text-gray-500 line-through">AED {product.originalPrice}</span>
         </div>
+        {product.sizes && product.sizes.length > 0 && (
+          <div className="mb-2">
+            <div className="flex items-center gap-1 mb-1">
+              <span className="text-xs font-medium text-muted-foreground">Sizes:</span>
+              <span className="text-xs text-muted-foreground">({product.sizes.length} available)</span>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {product.sizes.slice(0, 3).map((size, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {size}
+                </Badge>
+              ))}
+              {product.sizes.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{product.sizes.length - 3}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="p-4 pt-0">
         {isInCart ? (

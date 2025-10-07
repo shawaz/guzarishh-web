@@ -1,15 +1,19 @@
 'use client'
 
 import { useCart } from '@/contexts/CartContext'
+import { useConvexAuth } from '@/contexts/ConvexAuthContext'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function CheckoutPage() {
   const { items, total, itemCount, clearCart } = useCart()
+  const { user, loading } = useConvexAuth()
+  const router = useRouter()
   const [customerInfo, setCustomerInfo] = useState({
     firstName: '',
     lastName: '',
@@ -21,6 +25,61 @@ export default function CheckoutPage() {
     country: 'UAE'
   })
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login?redirect=/checkout')
+    }
+  }, [user, loading, router])
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-center">Login Required</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-center text-gray-600">
+                  Please log in to proceed with checkout.
+                </p>
+                <Button 
+                  onClick={() => router.push('/login?redirect=/checkout')}
+                  className="w-full"
+                >
+                  Go to Login
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   const shippingCost = total > 200 ? 0 : 25
   const finalTotal = total + shippingCost

@@ -64,8 +64,13 @@ export const create = mutation({
     reviews: v.optional(v.number()),
     category: v.union(v.literal("Casual"), v.literal("Festive"), v.literal("Office")),
     description: v.optional(v.string()),
-    size: v.optional(v.string()),
+    sizes: v.optional(v.array(v.string())),
     colors: v.optional(v.array(v.string())),
+    stockBySize: v.optional(v.array(v.object({
+      size: v.string(),
+      quantity: v.number(),
+      inStock: v.boolean()
+    }))),
     inStock: v.optional(v.boolean()),
     stockQuantity: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
@@ -82,8 +87,9 @@ export const create = mutation({
       reviews: args.reviews || 0,
       category: args.category,
       description: args.description,
-      size: args.size,
+      sizes: args.sizes,
       colors: args.colors,
+      stockBySize: args.stockBySize,
       inStock: args.inStock ?? true,
       stockQuantity: args.stockQuantity || 0,
       tags: args.tags,
@@ -92,7 +98,7 @@ export const create = mutation({
   },
 });
 
-// Update product
+// Update product with stock variants support
 export const update = mutation({
   args: {
     id: v.id("products"),
@@ -105,8 +111,13 @@ export const update = mutation({
     reviews: v.optional(v.number()),
     category: v.optional(v.union(v.literal("Casual"), v.literal("Festive"), v.literal("Office"))),
     description: v.optional(v.string()),
-    size: v.optional(v.string()),
+    sizes: v.optional(v.array(v.string())),
     colors: v.optional(v.array(v.string())),
+    stockBySize: v.optional(v.array(v.object({
+      size: v.string(),
+      quantity: v.number(),
+      inStock: v.boolean()
+    }))),
     inStock: v.optional(v.boolean()),
     stockQuantity: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
@@ -123,5 +134,32 @@ export const remove = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
     return await ctx.db.delete(args.id);
+  },
+});
+
+// Migration function to convert single size to sizes array
+export const migrateSizes = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const products = await ctx.db.query("products").collect();
+    let migratedCount = 0;
+    
+    for (const product of products) {
+      // Check if product has old 'size' field and no 'sizes' field
+      if ((product as any).size && !product.sizes) {
+        const oldSize = (product as any).size;
+        const sizesArray = oldSize ? [oldSize] : [];
+        
+        // Update the product to use sizes array
+        await ctx.db.patch(product._id, {
+          sizes: sizesArray,
+        });
+        
+        console.log(`Migrated product ${product.name}: ${oldSize} -> [${sizesArray.join(', ')}]`);
+        migratedCount++;
+      }
+    }
+    
+    return { migrated: migratedCount };
   },
 });
