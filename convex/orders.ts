@@ -169,6 +169,23 @@ export const updateOrderStatus = mutation({
   },
 });
 
+// Update order shipping information
+export const updateShippingInfo = mutation({
+  args: {
+    orderId: v.id("orders"),
+    trackingNumber: v.optional(v.string()),
+    deliveryPartner: v.optional(v.string()),
+    deliveryStatus: v.optional(v.string()),
+    courierOrderId: v.optional(v.string()),
+    deliveryTrackingHistory: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { orderId, ...updates } = args;
+    await ctx.db.patch(orderId, updates);
+    return orderId;
+  },
+});
+
 // Delete order (admin only)
 export const deleteOrder = mutation({
   args: { orderId: v.id("orders") },

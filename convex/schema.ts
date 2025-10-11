@@ -63,12 +63,21 @@ export default defineSchema({
     customerEmail: v.optional(v.string()),
     customerName: v.optional(v.string()),
     customerPhone: v.optional(v.string()),
+    // Shipping/Delivery fields
+    shippingCity: v.optional(v.string()),
+    deliveryPartner: v.optional(v.string()), // e.g., "speedyorder"
+    trackingNumber: v.optional(v.string()), // Courier tracking number
+    deliveryStatus: v.optional(v.string()), // Latest delivery status
+    deliveryTrackingHistory: v.optional(v.string()), // JSON string of tracking history
+    courierOrderId: v.optional(v.string()), // Courier's internal order ID
+    estimatedDeliveryDate: v.optional(v.number()),
   })
     .index("by_userId", ["userId"])
     .index("by_status", ["status"])
     .index("by_cartId", ["cartId"])
     .index("by_tranRef", ["tranRef"])
-    .index("by_paymentStatus", ["paymentStatus"]),
+    .index("by_paymentStatus", ["paymentStatus"])
+    .index("by_trackingNumber", ["trackingNumber"]),
 
   // Invoices table
   invoices: defineTable({
