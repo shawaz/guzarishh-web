@@ -20,6 +20,12 @@ export default defineSchema({
       quantity: v.number(),
       inStock: v.boolean()
     }))),
+    stockByVariant: v.optional(v.array(v.object({
+      size: v.string(),
+      color: v.string(),
+      quantity: v.number(),
+      inStock: v.boolean()
+    }))), // Stock by size AND color combination
     size: v.optional(v.string()), // Legacy field for backward compatibility
     inStock: v.optional(v.boolean()),
     stockQuantity: v.optional(v.number()), // Keep for backward compatibility
