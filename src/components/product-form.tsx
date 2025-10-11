@@ -39,6 +39,7 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
     stockQuantity: product?.stockQuantity || 0,
     tags: product?.tags || [],
     featured: product?.featured ?? false,
+    displayOrder: product?.displayOrder,
   })
 
   // State for managing uploaded images with storage IDs
@@ -483,16 +484,30 @@ export default function ProductForm({ product, onSubmit, onCancel, loading = fal
             )}
           </div>
 
-          {/* Featured */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="featured"
-              checked={formData.featured}
-              onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
-              className="rounded"
-            />
-            <label htmlFor="featured" className="text-sm font-medium">Featured Product</label>
+          {/* Featured and Display Order */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="featured"
+                checked={formData.featured}
+                onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+                className="rounded"
+              />
+              <label htmlFor="featured" className="text-sm font-medium">Featured Product</label>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Display Order (Homepage)</label>
+              <Input
+                type="number"
+                value={formData.displayOrder ?? ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: e.target.value ? Number(e.target.value) : undefined }))}
+                placeholder="e.g., 1, 2, 3... (lower = shown first)"
+                min="0"
+              />
+              <p className="text-xs text-gray-500 mt-1">Lower numbers appear first on homepage</p>
+            </div>
           </div>
 
           {/* Actions */}

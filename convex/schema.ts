@@ -25,10 +25,12 @@ export default defineSchema({
     stockQuantity: v.optional(v.number()), // Keep for backward compatibility
     tags: v.optional(v.array(v.string())),
     featured: v.optional(v.boolean()),
+    displayOrder: v.optional(v.number()), // Order for displaying on homepage
   })
     .index("by_category", ["category"])
     .index("by_featured", ["featured"])
-    .index("by_inStock", ["inStock"]),
+    .index("by_inStock", ["inStock"])
+    .index("by_displayOrder", ["displayOrder"]),
 
   // Orders table
   orders: defineTable({

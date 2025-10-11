@@ -1,11 +1,17 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-// Get all products
+// Get all products (sorted by display order)
 export const getAll = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("products").collect();
+    const products = await ctx.db.query("products").collect();
+    // Sort by displayOrder (ascending), with products without order at the end
+    return products.sort((a, b) => {
+      const orderA = a.displayOrder ?? 999999;
+      const orderB = b.displayOrder ?? 999999;
+      return orderA - orderB;
+    });
   },
 });
 
@@ -75,6 +81,7 @@ export const create = mutation({
     stockQuantity: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
     featured: v.optional(v.boolean()),
+    displayOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("products", {
@@ -94,6 +101,7 @@ export const create = mutation({
       stockQuantity: args.stockQuantity || 0,
       tags: args.tags,
       featured: args.featured || false,
+      displayOrder: args.displayOrder,
     });
   },
 });
@@ -122,10 +130,22 @@ export const update = mutation({
     stockQuantity: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
     featured: v.optional(v.boolean()),
+    displayOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
     return await ctx.db.patch(id, updates);
+  },
+});
+
+// Update product display order
+export const updateDisplayOrder = mutation({
+  args: {
+    id: v.id("products"),
+    displayOrder: v.number(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.id, { displayOrder: args.displayOrder });
   },
 });
 

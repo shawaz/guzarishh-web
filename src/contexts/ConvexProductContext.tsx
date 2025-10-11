@@ -27,6 +27,7 @@ export interface Product {
   stockQuantity?: number
   tags?: string[]
   featured?: boolean
+  displayOrder?: number
 }
 
 interface ProductContextType {

@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Package, Plus, Search, Edit, Trash2, Filter } from 'lucide-react'
+import { Package, Plus, Search, Edit, Trash2, Filter, ArrowUpDown } from 'lucide-react'
 import ProductForm from '@/components/product-form'
 import { Product } from '@/contexts/ConvexProductContext'
 import { Id } from '@/convex/_generated/dataModel'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 export default function AdminProducts() {
   const { user, loading, isAdmin } = useConvexAuth()
@@ -24,6 +26,9 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [editingOrder, setEditingOrder] = useState<{ [key: string]: number }>({})
+  
+  const updateDisplayOrder = useMutation(api.products.updateDisplayOrder)
 
   useEffect(() => {
     console.log('Admin products page - auth check:', { user, loading, isAdmin: isAdmin() })
@@ -65,6 +70,28 @@ export default function AdminProducts() {
   const handleFormClose = () => {
     setShowAddForm(false)
     setEditingProduct(null)
+  }
+
+  const handleOrderChange = (productId: string, value: string) => {
+    const numValue = parseInt(value)
+    if (!isNaN(numValue)) {
+      setEditingOrder(prev => ({ ...prev, [productId]: numValue }))
+    }
+  }
+
+  const handleSaveOrder = async (productId: string) => {
+    const newOrder = editingOrder[productId]
+    if (newOrder !== undefined) {
+      try {
+        await updateDisplayOrder({ id: productId as Id<"products">, displayOrder: newOrder })
+        setEditingOrder(prev => {
+          const { [productId]: _, ...rest } = prev
+          return rest
+        })
+      } catch (error) {
+        alert('Failed to update order: ' + error)
+      }
+    }
   }
 
   if (loading) {
@@ -218,6 +245,37 @@ export default function AdminProducts() {
               </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold mb-2 truncate">{product.name}</h3>
+                
+                {/* Display Order Control */}
+                <div className="mb-3 p-2 bg-gray-50 rounded-md border border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Order:</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editingOrder[product._id] ?? product.displayOrder ?? ''}
+                      onChange={(e) => handleOrderChange(product._id, e.target.value)}
+                      placeholder="Set order"
+                      className="h-7 w-20 text-sm"
+                    />
+                    {editingOrder[product._id] !== undefined && (
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleSaveOrder(product._id)}
+                        className="h-7 text-xs"
+                      >
+                        Save
+                      </Button>
+                    )}
+                    {product.displayOrder !== undefined && editingOrder[product._id] === undefined && (
+                      <Badge variant="outline" className="text-xs">
+                        #{product.displayOrder}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg font-bold text-primary">AED {product.price}</span>
                   {product.originalPrice && product.originalPrice > product.price && (
