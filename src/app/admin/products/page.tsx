@@ -83,13 +83,16 @@ export default function AdminProducts() {
     const newOrder = editingOrder[productId]
     if (newOrder !== undefined) {
       try {
+        console.log('Updating display order:', { productId, newOrder })
         await updateDisplayOrder({ id: productId as Id<"products">, displayOrder: newOrder })
+        console.log('Display order updated successfully')
         setEditingOrder(prev => {
           const { [productId]: _, ...rest } = prev
           return rest
         })
       } catch (error) {
-        alert('Failed to update order: ' + error)
+        console.error('Failed to update order:', error)
+        alert('Failed to update order: ' + (error instanceof Error ? error.message : error) + '\n\nPlease make sure Convex is running with: npx convex dev')
       }
     }
   }
