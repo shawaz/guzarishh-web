@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { XCircle, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
-export default function PaymentCancelPage() {
+function CancelContent() {
   const searchParams = useSearchParams()
   const tranRef = searchParams.get('tranRef')
   const respMessage = searchParams.get('respMessage')
@@ -82,5 +83,24 @@ export default function PaymentCancelPage() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function PaymentCancelPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <CancelContent />
+    </Suspense>
   )
 }
