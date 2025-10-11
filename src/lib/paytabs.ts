@@ -94,6 +94,10 @@ export async function createPayTabsPayment(
     throw new Error('PayTabs server key not configured');
   }
 
+  console.log('Creating PayTabs payment with profile_id:', paymentData.profile_id);
+  console.log('Server key length:', serverKey.length);
+  console.log('Server key starts with:', serverKey.substring(0, 10));
+  
   const response = await fetch(PAYTABS_API_ENDPOINT, {
     method: 'POST',
     headers: {
@@ -103,9 +107,18 @@ export async function createPayTabsPayment(
     body: JSON.stringify(paymentData),
   });
 
+  console.log('PayTabs response status:', response.status);
+  
   if (!response.ok) {
-    const error: PayTabsErrorResponse = await response.json();
-    throw new Error(error.message || 'Payment request failed');
+    const errorText = await response.text();
+    console.error('PayTabs error response:', errorText);
+    
+    try {
+      const error: PayTabsErrorResponse = JSON.parse(errorText);
+      throw new Error(error.message || 'Payment request failed');
+    } catch (e) {
+      throw new Error(`Payment request failed: ${errorText}`);
+    }
   }
 
   return response.json();
