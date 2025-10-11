@@ -89,53 +89,62 @@ export default function CheckoutPage() {
     setCustomerInfo(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleTelrPayment = async () => {
+  const handlePayTabsPayment = async () => {
     setIsProcessing(true)
     
     try {
-      // Telr payment gateway integration
-      const paymentData = {
-        store_id: process.env.NEXT_PUBLIC_TELR_STORE_ID,
-        authkey: process.env.NEXT_PUBLIC_TELR_AUTH_KEY,
-        tran_type: 'sale',
-        tran_class: 'ecom',
-        cart_id: `GZR_${Date.now()}`,
-        cart_description: `Guzarishh Order - ${itemCount} items`,
-        cart_currency: 'AED',
-        cart_amount: finalTotal.toString(),
-        return_url: `${window.location.origin}/payment/success`,
-        cancel_url: `${window.location.origin}/payment/cancel`,
-        customer_ref: customerInfo.email,
-        billing_fname: customerInfo.firstName,
-        billing_lname: customerInfo.lastName,
-        billing_email: customerInfo.email,
-        billing_phone: customerInfo.phone,
-        billing_address: customerInfo.address,
-        billing_city: customerInfo.city,
-        billing_country: customerInfo.country,
-        billing_zip: customerInfo.postalCode,
-      }
-
-      // Create form and submit to Telr
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = 'https://secure.telr.com/gateway/order.json'
-      form.target = '_self'
-
-      Object.entries(paymentData).forEach(([key, value]) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = value || ''
-        form.appendChild(input)
+      // Generate unique cart ID
+      const cartId = `GZR_${Date.now()}_${Math.random().toString(36).substring(7)}`
+      
+      // Create payment request
+      const response = await fetch('/api/paytabs/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: finalTotal,
+          currency: 'AED',
+          cartId: cartId,
+          description: `Guzarishh Order - ${itemCount} item${itemCount > 1 ? 's' : ''}`,
+          customerDetails: {
+            firstName: customerInfo.firstName,
+            lastName: customerInfo.lastName,
+            email: customerInfo.email,
+            phone: customerInfo.phone,
+            address: customerInfo.address,
+            city: customerInfo.city,
+            state: '',
+            country: customerInfo.country,
+          },
+        }),
       })
 
-      document.body.appendChild(form)
-      form.submit()
-      document.body.removeChild(form)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Payment creation failed')
+      }
+
+      if (data.requiresRedirect && data.redirectUrl) {
+        // Redirect to PayTabs payment page
+        window.location.href = data.redirectUrl
+      } else if (!data.requiresRedirect && data.paymentResult) {
+        // Direct payment result (rare case)
+        if (data.paymentResult.response_status === 'A') {
+          // Clear cart on successful payment
+          clearCart()
+          router.push(`/payment/success?tranRef=${data.tranRef}&cartId=${cartId}`)
+        } else {
+          throw new Error(data.paymentResult.response_message || 'Payment failed')
+        }
+      } else {
+        throw new Error('Unexpected payment response')
+      }
       
     } catch (error) {
       console.error('Payment error:', error)
+      alert(error instanceof Error ? error.message : 'Payment failed. Please try again.')
       setIsProcessing(false)
     }
   }
@@ -326,16 +335,16 @@ export default function CheckoutPage() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-semibold mb-2">Secure Payment with Telr</h4>
+                      <h4 className="font-semibold mb-2">Secure Payment with PayTabs</h4>
                       <p className="text-sm text-gray-600">
-                        Your payment will be processed securely through Telr payment gateway. 
+                        Your payment will be processed securely through PayTabs payment gateway. 
                         We accept all major credit and debit cards.
                       </p>
                     </div>
                     
                     <Button
                       className="w-full"
-                      onClick={handleTelrPayment}
+                      onClick={handlePayTabsPayment}
                       disabled={isProcessing || !customerInfo.firstName || !customerInfo.lastName || !customerInfo.email || !customerInfo.phone || !customerInfo.address || !customerInfo.city || !customerInfo.postalCode}
                     >
                       {isProcessing ? 'Processing...' : `Pay AED ${finalTotal}`}

@@ -1,107 +1,179 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-// Get all orders
-export const getAll = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("orders").collect();
-  },
-});
-
-// Get orders by user ID
-export const getByUserId = query({
-  args: { userId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("orders")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
-  },
-});
-
-// Get orders by status
-export const getByStatus = query({
-  args: { 
+// Create a new order
+export const createOrder = mutation({
+  args: {
+    userId: v.string(),
+    items: v.string(), // JSON string of cart items
+    total: v.number(),
     status: v.union(
       v.literal("pending"),
       v.literal("processing"),
       v.literal("shipped"),
       v.literal("delivered"),
       v.literal("cancelled")
-    )
+    ),
+    shippingAddress: v.optional(v.string()),
+    paymentMethod: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    // PayTabs fields
+    cartId: v.optional(v.string()),
+    tranRef: v.optional(v.string()),
+    paymentStatus: v.optional(
+      v.union(
+        v.literal("authorized"),
+        v.literal("held"),
+        v.literal("pending"),
+        v.literal("voided"),
+        v.literal("declined"),
+        v.literal("expired")
+      )
+    ),
+    paymentGateway: v.optional(v.string()),
+    paymentDetails: v.optional(v.string()),
+    customerEmail: v.optional(v.string()),
+    customerName: v.optional(v.string()),
+    customerPhone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const orderId = await ctx.db.insert("orders", args);
+    return orderId;
+  },
+});
+
+// Update order payment status
+export const updateOrderPaymentStatus = mutation({
+  args: {
+    cartId: v.string(),
+    tranRef: v.string(),
+    paymentStatus: v.union(
+      v.literal("authorized"),
+      v.literal("held"),
+      v.literal("pending"),
+      v.literal("voided"),
+      v.literal("declined"),
+      v.literal("expired")
+    ),
+    paymentDetails: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Find order by cartId
+    const order = await ctx.db
       .query("orders")
-      .withIndex("by_status", (q) => q.eq("status", args.status))
-      .collect();
-  },
-});
+      .withIndex("by_cartId", (q) => q.eq("cartId", args.cartId))
+      .first();
 
-// Get order by ID
-export const getById = query({
-  args: { id: v.id("orders") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
-  },
-});
+    if (!order) {
+      throw new Error(`Order not found with cartId: ${args.cartId}`);
+    }
 
-// Create order
-export const create = mutation({
-  args: {
-    userId: v.string(),
-    items: v.string(), // JSON string of cart items
-    total: v.number(),
-    status: v.optional(v.union(
-      v.literal("pending"),
-      v.literal("processing"),
-      v.literal("shipped"),
-      v.literal("delivered"),
-      v.literal("cancelled")
-    )),
-    shippingAddress: v.optional(v.string()),
-    paymentMethod: v.optional(v.string()),
-    notes: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("orders", {
-      userId: args.userId,
-      items: args.items,
-      total: args.total,
-      status: args.status || "pending",
-      shippingAddress: args.shippingAddress,
-      paymentMethod: args.paymentMethod,
-      notes: args.notes,
+    // Update order with payment information
+    await ctx.db.patch(order._id, {
+      tranRef: args.tranRef,
+      paymentStatus: args.paymentStatus,
+      paymentDetails: args.paymentDetails,
+      status: args.paymentStatus === "authorized" ? "processing" : "pending",
     });
+
+    return order._id;
   },
 });
 
-// Update order
-export const update = mutation({
+// Get order by cart ID
+export const getOrderByCartId = query({
+  args: { cartId: v.string() },
+  handler: async (ctx, args) => {
+    const order = await ctx.db
+      .query("orders")
+      .withIndex("by_cartId", (q) => q.eq("cartId", args.cartId))
+      .first();
+    return order;
+  },
+});
+
+// Get order by transaction reference
+export const getOrderByTranRef = query({
+  args: { tranRef: v.string() },
+  handler: async (ctx, args) => {
+    const order = await ctx.db
+      .query("orders")
+      .withIndex("by_tranRef", (q) => q.eq("tranRef", args.tranRef))
+      .first();
+    return order;
+  },
+});
+
+// Get orders by user ID
+export const getOrdersByUserId = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+    return orders;
+  },
+});
+
+// Get all orders (admin)
+export const getAllOrders = query({
+  handler: async (ctx) => {
+    const orders = await ctx.db.query("orders").order("desc").collect();
+    return orders;
+  },
+});
+
+// Get orders by payment status
+export const getOrdersByPaymentStatus = query({
   args: {
-    id: v.id("orders"),
-    status: v.optional(v.union(
+    paymentStatus: v.union(
+      v.literal("authorized"),
+      v.literal("held"),
+      v.literal("pending"),
+      v.literal("voided"),
+      v.literal("declined"),
+      v.literal("expired")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_paymentStatus", (q) =>
+        q.eq("paymentStatus", args.paymentStatus)
+      )
+      .order("desc")
+      .collect();
+    return orders;
+  },
+});
+
+// Update order status
+export const updateOrderStatus = mutation({
+  args: {
+    orderId: v.id("orders"),
+    status: v.union(
       v.literal("pending"),
       v.literal("processing"),
       v.literal("shipped"),
       v.literal("delivered"),
       v.literal("cancelled")
-    )),
-    shippingAddress: v.optional(v.string()),
-    paymentMethod: v.optional(v.string()),
-    notes: v.optional(v.string()),
+    ),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args;
-    return await ctx.db.patch(id, updates);
+    await ctx.db.patch(args.orderId, {
+      status: args.status,
+    });
+    return args.orderId;
   },
 });
 
-// Delete order
-export const remove = mutation({
-  args: { id: v.id("orders") },
+// Delete order (admin only)
+export const deleteOrder = mutation({
+  args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
-    return await ctx.db.delete(args.id);
+    await ctx.db.delete(args.orderId);
+    return args.orderId;
   },
 });

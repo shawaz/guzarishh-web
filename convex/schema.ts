@@ -45,9 +45,28 @@ export default defineSchema({
     shippingAddress: v.optional(v.string()),
     paymentMethod: v.optional(v.string()),
     notes: v.optional(v.string()),
+    // PayTabs payment fields
+    cartId: v.optional(v.string()), // Unique cart/order reference
+    tranRef: v.optional(v.string()), // PayTabs transaction reference
+    paymentStatus: v.optional(v.union(
+      v.literal("authorized"),
+      v.literal("held"),
+      v.literal("pending"),
+      v.literal("voided"),
+      v.literal("declined"),
+      v.literal("expired")
+    )),
+    paymentGateway: v.optional(v.string()), // e.g., "paytabs"
+    paymentDetails: v.optional(v.string()), // JSON string of payment info
+    customerEmail: v.optional(v.string()),
+    customerName: v.optional(v.string()),
+    customerPhone: v.optional(v.string()),
   })
     .index("by_userId", ["userId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_cartId", ["cartId"])
+    .index("by_tranRef", ["tranRef"])
+    .index("by_paymentStatus", ["paymentStatus"]),
 
   // Invoices table
   invoices: defineTable({

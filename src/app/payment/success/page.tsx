@@ -1,16 +1,35 @@
+'use client'
+
+import { useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
+import { useCart } from '@/contexts/CartContext'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Package, Mail } from 'lucide-react'
+import { CheckCircle, Package, Mail, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 
 export default function PaymentSuccessPage() {
+  const searchParams = useSearchParams()
+  const { clearCart } = useCart()
+  
+  const tranRef = searchParams.get('tranRef')
+  const cartId = searchParams.get('cartId')
+  const respMessage = searchParams.get('respMessage')
+  
+  useEffect(() => {
+    // Clear cart on successful payment
+    if (tranRef) {
+      clearCart()
+    }
+  }, [tranRef, clearCart])
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-1 flex items-center justify-center py-12">
+      <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -23,9 +42,18 @@ export default function PaymentSuccessPage() {
               <p className="text-gray-600 mb-4">
                 Thank you for your order! Your payment has been processed successfully.
               </p>
-              <p className="text-sm text-gray-500">
-                Order ID: GZR_{Date.now()}
-              </p>
+              {cartId && (
+                <div className="bg-gray-50 p-3 rounded-lg mb-2">
+                  <p className="text-sm font-medium text-gray-700">Order ID</p>
+                  <p className="text-xs text-gray-600 font-mono">{cartId}</p>
+                </div>
+              )}
+              {tranRef && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700">Transaction Reference</p>
+                  <p className="text-xs text-gray-600 font-mono">{tranRef}</p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -44,6 +72,16 @@ export default function PaymentSuccessPage() {
                   <p className="text-xs text-gray-600">Your order is being prepared for shipment</p>
                 </div>
               </div>
+
+              <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                <CreditCard className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="font-medium text-sm">Payment Confirmed</p>
+                  <p className="text-xs text-gray-600">
+                    {respMessage || 'Transaction completed successfully'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -52,19 +90,22 @@ export default function PaymentSuccessPage() {
                   Continue Shopping
                 </Button>
               </Link>
-              <Link href="/orders">
+              <Link href="/dashboard">
                 <Button variant="outline" className="w-full">
-                  View Order Status
+                  View My Orders
                 </Button>
               </Link>
             </div>
 
-            <div className="text-center">
-              <p className="text-xs text-gray-500">
+            <div className="text-center border-t pt-4">
+              <p className="text-xs text-gray-500 mb-2">
                 Need help? Contact us at{' '}
                 <a href="mailto:info@guzarishh.com" className="text-primary hover:underline">
                   info@guzarishh.com
                 </a>
+              </p>
+              <p className="text-xs text-gray-400">
+                Powered by PayTabs Secure Payment Gateway
               </p>
             </div>
           </CardContent>

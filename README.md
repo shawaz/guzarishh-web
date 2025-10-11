@@ -10,6 +10,8 @@ A modern, full-stack e-commerce platform built with Next.js, Convex, and Tailwin
 - **Product Categories**: Casual, Festive, and Office wear categories
 - **Product Detail Pages**: Comprehensive product information with image galleries
 - **Search & Filter**: Product search and category filtering
+- **Payment Gateway**: Integrated with PayTabs for secure payment processing
+- **Checkout Flow**: Complete checkout process with customer information and payment
 
 ### 🔐 **Authentication & Authorization**
 - **User Authentication**: Email/password based authentication
@@ -35,6 +37,7 @@ A modern, full-stack e-commerce platform built with Next.js, Convex, and Tailwin
 - **Styling**: Tailwind CSS, Shadcn/ui components
 - **Backend**: Convex (Database + Real-time + File Storage)
 - **Authentication**: Custom authentication system
+- **Payment Gateway**: PayTabs
 - **Icons**: Lucide React
 - **State Management**: React Context API
 
@@ -61,9 +64,14 @@ A modern, full-stack e-commerce platform built with Next.js, Convex, and Tailwin
 4. **Environment Variables**
    Create a `.env.local` file in the root directory:
    ```env
+   # Convex
    NEXT_PUBLIC_CONVEX_URL=your_convex_deployment_url
-   NEXT_PUBLIC_TELR_STORE_ID=your_telr_store_id (optional)
-   NEXT_PUBLIC_TELR_AUTH_KEY=your_telr_auth_key (optional)
+   
+   # PayTabs Payment Gateway
+   PAYTABS_SERVER_KEY=your_server_key
+   PAYTABS_CLIENT_KEY=your_client_key
+   PAYTABS_PROFILE_ID=your_profile_id
+   NEXT_PUBLIC_PAYTABS_PROFILE_ID=your_profile_id
    ```
    
    You can copy from `env.example` and fill in your actual values.
@@ -83,7 +91,9 @@ A modern, full-stack e-commerce platform built with Next.js, Convex, and Tailwin
 2. **Browse Products**: Explore products by category (Casual, Festive, Office)
 3. **View Product Details**: Click on any product to see full details
 4. **Add to Cart**: Add products to your shopping cart
-5. **Checkout**: Complete your purchase
+5. **Checkout**: Complete your purchase with secure PayTabs payment
+6. **Payment**: Securely pay using credit/debit cards through PayTabs
+7. **Order Confirmation**: Receive order confirmation and transaction details
 
 ### **For Administrators**
 1. **Admin Login**: Use `admin@guzarishh.com` / `admin123`
@@ -141,16 +151,34 @@ guzarishh-client/
 - **Customer Management**: View and manage customer profiles
 - **Supplier Management**: Manage supplier information
 
+## 💳 **Payment Gateway Integration**
+
+### **PayTabs Setup**
+
+This application uses PayTabs as the payment gateway. For detailed setup instructions, see [SETUP_PAYTABS.md](./SETUP_PAYTABS.md).
+
+**Quick Setup:**
+1. Get your PayTabs credentials (Server Key, Client Key, Profile ID)
+2. Add them to your `.env.local` file
+3. Configure callback URLs in PayTabs dashboard
+4. Test with sandbox cards
+
+**Documentation:**
+- [PayTabs Integration Guide](./PAYTABS_INTEGRATION.md) - Complete integration documentation
+- [PayTabs Setup Guide](./SETUP_PAYTABS.md) - Step-by-step setup instructions
+- [PayTabs Developer Docs](https://site.paytabs.com/en/developers/) - Official documentation
+
 ## 🚀 **Deployment**
 
 ### **Vercel (Recommended)**
 1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
+2. Set environment variables in Vercel dashboard (including PayTabs credentials)
 3. Deploy automatically on every push to main branch
 
 ### **Other Platforms**
 - The application can be deployed to any platform that supports Next.js
-- Ensure to set the `NEXT_PUBLIC_CONVEX_URL` environment variable
+- Ensure to set all environment variables including PayTabs keys
+- Callback URLs must be publicly accessible (HTTPS required)
 
 ## 🤝 **Contributing**
 
