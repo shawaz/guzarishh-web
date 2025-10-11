@@ -96,13 +96,14 @@ export async function createPayTabsPayment(
 
   console.log('Creating PayTabs payment with profile_id:', paymentData.profile_id);
   console.log('Server key length:', serverKey.length);
-  console.log('Server key starts with:', serverKey.substring(0, 10));
+  console.log('Server key value:', serverKey);
+  console.log('Request body:', JSON.stringify(paymentData, null, 2));
   
   const response = await fetch(PAYTABS_API_ENDPOINT, {
     method: 'POST',
     headers: {
-      'Authorization': serverKey,
-      'Content-Type': 'application/json',
+      'authorization': serverKey,
+      'content-type': 'application/json',
     },
     body: JSON.stringify(paymentData),
   });
